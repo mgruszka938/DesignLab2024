@@ -4,4 +4,6 @@
 - stepper motor
 - driver module
 - 12V power supply
+- breadboard
 ## Timeline
+
