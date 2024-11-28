@@ -1,23 +1,23 @@
-// Constants for your stepper motor
-const int stepsPerRevolution = 200; // Full steps per revolution (adjust for microstepping)
+const int stepsPerRevolution = 200; // could be adjusted for microstepping
 
-// Define pin connections
-const int stepPin = 2; // A4988 STEP pin
-const int dirPin = 5;  // A4988 DIR pin
+// Pin connections
+const int stepPin = 2; // A4988 STEP
+const int dirPin = 5;  // A4988 DIR
 
-// Variables for position tracking
-long currentPosition = 0; // Track the current position in steps
-long resetPosition = 0;   // Reference position
+// Keeps track of the position
+long currentPosition = 0;
+long resetPosition = 0;
 
 // Function prototypes
 void processCommand(String command);
 void moveMotor(int steps);
 
-void setup() {
-  // Initialize Serial communication
+void setup()
+{
+  // Initialize Serial COM
   Serial.begin(9600);
   Serial.println("A4988 Stepper Motor Controller Ready.");
-  Serial.println("Commands: MOVE LEFT <steps>, MOVE RIGHT <steps>, RESET, POSITION");
+  Serial.println("Commands: MOVE LEFT <steps>, MOVE RIGHT <steps>, RESET, POSITION"); // more commands could be added
 
   // Set pin modes
   pinMode(stepPin, OUTPUT);
@@ -28,12 +28,14 @@ void setup() {
   digitalWrite(dirPin, LOW);
 }
 
-void loop() {
+void loop()
+{
   // Check if there's any serial data available
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0)
+  {
     // Read the incoming command
     String command = Serial.readStringUntil('\n');
-    command.trim(); // Remove any leading/trailing whitespace
+    command.trim();
 
     // Process the command
     processCommand(command);
@@ -41,60 +43,84 @@ void loop() {
 }
 
 // Function to process user commands
-void processCommand(String command) {
-  command.toUpperCase(); // Make it case-insensitive
+void processCommand(String command)
+{
+  command.toUpperCase(); // Upper case (doesn't care about letters)
 
-  if (command.startsWith("MOVE LEFT")) {
+  if (command.startsWith("MOVE LEFT"))
+  {
     int steps = command.substring(10).toInt();
-    if (steps > 0) {
+    if (steps > 0)
+    {
       moveMotor(-steps);
-    } else {
+    }
+    else
+    {
       Serial.println("Invalid step count!");
     }
-  } else if (command.startsWith("MOVE RIGHT")) {
+  }
+  else if (command.startsWith("MOVE RIGHT"))
+  {
     int steps = command.substring(11).toInt();
-    if (steps > 0) {
+    if (steps > 0)
+    {
       moveMotor(steps);
-    } else {
+    }
+    else
+    {
       Serial.println("Invalid step count!");
     }
-  } else if (command.equalsIgnoreCase("RESET")) {
+  }
+  else if (command.equalsIgnoreCase("RESET"))
+  {
     // Calculate steps to return to zero position
     long stepsToZero = resetPosition - currentPosition;
 
-    if (stepsToZero != 0) {
+    if (stepsToZero != 0)
+    {
       // Move motor to zero position
       moveMotor(stepsToZero);
       Serial.println("Position reset.");
-    } else {
+    }
+    else
+    {
       Serial.println("Motor already at zero position.");
     }
 
     // Update position tracking
     resetPosition = 0;
     currentPosition = 0;
-  } else if (command == "POSITION") {
+  }
+  else if (command == "POSITION")
+  {
     Serial.print("Current Position: ");
     Serial.println(currentPosition - resetPosition);
-  } else {
+  }
+  else
+  {
     Serial.println("Unknown command. Use MOVE LEFT, MOVE RIGHT, RESET, or POSITION.");
   }
 }
 
 // Function to move the motor
-void moveMotor(int steps) {
+void moveMotor(int steps)
+{
   // Set direction
-  if (steps > 0) {
+  if (steps > 0)
+  {
     digitalWrite(dirPin, HIGH); // Move right
-  } else {
+  }
+  else
+  {
     digitalWrite(dirPin, LOW); // Move left
-    steps = -steps; // Convert to positive for the loop
+    steps = -steps;            // Convert to positive for the loop
   }
 
   // Move the motor step by step
-  for (int i = 0; i < steps; i++) {
+  for (int i = 0; i < steps; i++)
+  {
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(500); // Adjust this delay for speed (500 µs = ~1kHz step rate)
+    delayMicroseconds(500);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(500);
   }
