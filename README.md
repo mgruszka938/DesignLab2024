@@ -4,6 +4,8 @@
 - stepper motor NEMA 17 (bipolar)
 - driver module A4988
 - 12V power supply
+## Schematic
+![SVG Image](schematic.drawio.svg)
 ## Usage
 Commands supported:
 ```
