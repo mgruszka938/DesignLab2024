@@ -1,3 +1,22 @@
+/*
+ * Stepper Motor Controller
+ *
+ * Authors: Mikołaj Gruszka, Szymon Rumin
+ * Created for: Design Laboratory
+ *
+ * Description:
+ * This program is designed to control a stepper motor using the A4988 driver.
+ * It supports commands sent over UART for moving the motor, resetting its position,
+ * and querying its current position. The motor's movement is tracked internally.
+ *
+ * Commands supported:
+ * - MOVE LEFT <steps>
+ * - MOVE RIGHT <steps>
+ * - RESET
+ * - POSITION
+ *
+ */
+
 const int stepsPerRevolution = 200; // could be adjusted for microstepping
 
 // Pin connections
@@ -129,6 +148,6 @@ void moveMotor(int steps)
   currentPosition += (steps * (digitalRead(dirPin) == HIGH ? 1 : -1));
 
   Serial.print("Motor moved ");
-  Serial.print(steps);
+  Serial.print(steps); // Ending message
   Serial.println(digitalRead(dirPin) == HIGH ? " steps right." : " steps left.");
 }
