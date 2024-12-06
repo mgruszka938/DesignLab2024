@@ -14,7 +14,9 @@
  * - MOVE RIGHT <steps>
  * - RESET
  * - POSITION
- *
+ * - ADD POS <name>  
+ * - GOTO <name>
+ * - DEL POS <name>
  */
 
 // Constants
