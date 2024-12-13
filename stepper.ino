@@ -47,7 +47,7 @@ void setup()
   // Initialize Serial COM
   Serial.begin(9600);
   Serial.println("A4988 Stepper Motor Controller Ready.");
-  Serial.println("Commands: MOVE LEFT <steps>, MOVE RIGHT <steps>, RESET, POSITION, ADD POS <name>, GOTO <name>, DEL POS <name>");
+  printCommands();
 
   // Set pin modes
   pinMode(stepPin, OUTPUT);
@@ -77,7 +77,7 @@ void processCommand(String command)
 {
   command.toUpperCase(); // Upper case (case insensitive commands)
 
-  if (command.startsWith("MOVE LEFT"))
+  if (command.startsWith("MVL"))
   {
     int steps = command.substring(10).toInt();
     if (steps > 0)
@@ -89,7 +89,7 @@ void processCommand(String command)
       Serial.println("Invalid step count!");
     }
   }
-  else if (command.startsWith("MOVE RIGHT"))
+  else if (command.startsWith("MVR"))
   {
     int steps = command.substring(11).toInt();
     if (steps > 0)
@@ -101,7 +101,7 @@ void processCommand(String command)
       Serial.println("Invalid step count!");
     }
   }
-  else if (command.equalsIgnoreCase("RESET"))
+  else if (command.equalsIgnoreCase("RST"))
   {
     long stepsToZero = resetPosition - currentPosition;
 
@@ -118,12 +118,12 @@ void processCommand(String command)
     resetPosition = 0;
     currentPosition = 0;
   }
-  else if (command == "POSITION")
+  else if (command == "POS")
   {
     Serial.print("Current Position: ");
     Serial.println(currentPosition - resetPosition);
   }
-  else if (command.startsWith("ADD POS"))
+  else if (command.startsWith("ADDPOS"))
   {
     String name = command.substring(8);
     addNamedPosition(name);
@@ -133,15 +133,31 @@ void processCommand(String command)
     String name = command.substring(5);
     moveToNamedPosition(name);
   }
-  else if (command.startsWith("DEL POS"))
+  else if (command.startsWith("DLPOS"))
   {
     String name = command.substring(8);
     deleteNamedPosition(name);
   }
+  else if (command == "?")
+  {
+    printCommands();
+  }
   else
   {
-    Serial.println("Unknown command. Use MOVE LEFT, MOVE RIGHT, RESET, POSITION, ADD POS <name>, GOTO <name>, DEL POS <name>.");
+    Serial.println("Unknown command");
   }
+}
+
+void printCommands()
+{
+  Serial.println("Commands:");
+  Serial.println("MVL <steps> - move left");
+  Serial.println("MVR <steps> - move right");
+  Serial.println("RST - reset the position");
+  Serial.println("POS - view current position");
+  Serial.println("ADDPOS <name> - add a new position");
+  Serial.println("GOTO <name> - go to <name> position");
+  Serial.println("DLPOS <name> - delete <name> position");
 }
 
 // Function to move the motor
