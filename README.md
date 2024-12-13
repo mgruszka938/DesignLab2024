@@ -9,13 +9,14 @@
 ## Usage
 Commands supported:
 ```
-- MOVE LEFT <steps>
-- MOVE RIGHT <steps>
-- RESET
-- POSITION
-- ADD POS <name>  
-- GOTO <name>
-- DEL POS <name>
+Commands:
+MVL <steps> - move left
+MVR <steps> - move right
+RST - reset the position
+POS - view current position
+ADDPOS <name> - add a new position
+GOTO <name> - go to <name> position
+DLPOS <name> - delete <name> position
 ```
 ## Timeline
 - We've spent first couple of weeks on acquring knowledge about stepper motors.
