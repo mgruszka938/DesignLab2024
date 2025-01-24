@@ -18,6 +18,7 @@ ADDPOS <name> - add a new position
 GOTO <name> - go to <name> position
 DLPOS <name> - delete <name> position
 LSTPOS - list saved positions
+SPD <1|2|3> - set motor speed (1 - 50 steps/s, 2 - 75 steps/s, 3 - 90 steps/s)
 ```
 ## Timeline
 - We've spent first couple of weeks on acquring knowledge about stepper motors.
