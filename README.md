@@ -28,6 +28,7 @@ SPD <1|2|3> - set motor speed (1 - 50 steps/s, 2 - 75 steps/s, 3 - 90 steps/s)
 - We added multiple move functions that we thought would be suitable for the darkbox environment.
 - We extended the functionality by integrating EEPROM memory to save and retrieve motor positions, ensuring persistence across power cycles.
 - We also adjusted the movement range to a safe limit of -100 to 100 steps to prevent mechanical issues.
+- Additionally, we introduced an option to adjust the motor speed, providing greater flexibility and control over the motor's performance.
 - We plan on adding further components and functions if needed.
 ## Authors
 - Mikołaj Gruszka
