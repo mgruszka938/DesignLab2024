@@ -18,9 +18,10 @@
  * GOTO <name> - go to <name> position
  * DLPOS <name> - delete <name> position
  * LSTPOS - list saved positions
+ * SPD <1|2|3> - set motor speed (1 - 50 steps/s, 2 - 75 steps/s, 3 - 90 steps/s)
  */
 
-// EEPROM library
+// Memory library
 #include <EEPROM.h>
 
 // EEPROM constants
@@ -44,6 +45,13 @@ String positionNames[maxPositions];
 long positionValues[maxPositions];
 int positionCount = 0;
 
+// Speed control
+int motorSpeed = 50; // Default: 50 steps per second
+long stepDelay = 1000000 / motorSpeed; // Delay in microseconds per step
+const int predefinedSpeeds[] = {50, 75, 90};
+const int numSpeeds = sizeof(predefinedSpeeds) / sizeof(predefinedSpeeds[0]);
+
+
 // Function prototypes
 void processCommand(String command);
 void moveMotor(int steps);
@@ -66,15 +74,16 @@ void setup()
   digitalWrite(stepPin, LOW);
   digitalWrite(dirPin, LOW);
 
-  // Load saved positions and print avaliable commands
+  // Load saved positions and print available commands
   printCommands();
   loadFromEEPROM();
+
+  Serial.print("Current stepper speed: ");
+  Serial.println(motorSpeed);
 
   // Read stepper position from EEPROM
   Serial.print("Current stepper position: ");
   Serial.println(currentPosition);
-
-
 }
 
 void loop()
@@ -178,6 +187,29 @@ void processCommand(String command)
   {
     listNamedPositions();
   }
+  else if (command.startsWith("SPD"))
+  {
+    int speedIndex = command.substring(4).toInt() - 1;
+    if (speedIndex >= 0 && speedIndex < numSpeeds)
+    {
+        motorSpeed = predefinedSpeeds[speedIndex];
+        stepDelay = 1000000 / motorSpeed;
+        Serial.print("Motor speed set to ");
+        Serial.print(motorSpeed);
+        Serial.println(" steps per second.");
+    }
+    else
+    {
+        Serial.println("Invalid speed! Choose 1, 2, or 3:");
+        for (int i = 0; i < numSpeeds; i++)
+        {
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.print(predefinedSpeeds[i]);
+            Serial.println(" steps per second.");
+        }
+    }
+  }
   else if (command == "?")
   {
     printCommands();
@@ -199,6 +231,7 @@ void printCommands()
   Serial.println("GOTO <name> - go to <name> position");
   Serial.println("DLPOS <name> - delete <name> position");
   Serial.println("LSTPOS - list saved positions");
+  Serial.println("SPD <1|2|3> - set motor speed (1 - 50 steps/s, 2 - 75 steps/s, 3 - 90 steps/s)");
 }
 
 // Function to move the motor
@@ -220,9 +253,9 @@ void moveMotor(int steps)
   for (int i = 0; i < steps; i++)
   {
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(10000);
+    delayMicroseconds(stepDelay / 2);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(10000);
+    delayMicroseconds(stepDelay / 2);
   }
 
   currentPosition += (steps * (digitalRead(dirPin) == HIGH ? 1 : -1));
@@ -230,7 +263,6 @@ void moveMotor(int steps)
   Serial.print("Motor moved ");
   Serial.print(steps);
   Serial.println(digitalRead(dirPin) == HIGH ? " steps right." : " steps left.");
-
 }
 
 // Function to add a named position
@@ -379,39 +411,38 @@ void saveToEEPROM() {
 // Function to load program data from EEPROM memory
 void loadFromEEPROM()
 {
-  EEPROM.get(0, currentPosition);
+    EEPROM.get(0, currentPosition);
 
-  // Check if the loaded position is in a valid range, otherwise reset to 0
-  if (currentPosition < -100 || currentPosition > 100) {
-    Serial.println("Invalid position in EEPROM, resetting to 0.");
-    currentPosition = 0;  // Reset to 0 if the position is invalid
-  }
-
-  positionCount = 0;
-
-  // Load saved named positions from EEPROM
-  for (int i = 0; i < maxPositions; i++) {
-    int address = 4 + i * RECORD_SIZE;
-
-    long value;
-    EEPROM.get(address, value);
-
-    char name[NAME_SIZE];
-    for (int j = 0; j < NAME_SIZE; j++) {
-      name[j] = EEPROM.read(address + 4 + j);
-    }
-    name[NAME_SIZE - 1] = '\0';
-
-    if (name[0] == '\0') {
-      break;
+    if (currentPosition < -100 || currentPosition > 100) {
+        Serial.println("Invalid position in EEPROM, resetting to 0.");
+        currentPosition = 0;
+        saveToEEPROM();
     }
 
-    positionNames[positionCount] = String(name);
-    positionValues[positionCount] = value;
-    positionCount++;
+    positionCount = 0;
 
-    if (positionCount >= maxPositions) {
-      break;
+    for (int i = 0; i < maxPositions; i++) {
+        int address = 4 + i * RECORD_SIZE;
+
+        long value;
+        EEPROM.get(address, value);
+
+        char name[NAME_SIZE];
+        for (int j = 0; j < NAME_SIZE; j++) {
+            name[j] = EEPROM.read(address + 4 + j);
+        }
+        name[NAME_SIZE - 1] = '\0';
+
+        if (name[0] == '\0') {
+            break;
+        }
+
+        positionNames[positionCount] = String(name);
+        positionValues[positionCount] = value;
+        positionCount++;
+
+        if (positionCount >= maxPositions) {
+            break;
+        }
     }
-  }
 }
