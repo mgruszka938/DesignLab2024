@@ -5,7 +5,7 @@
 - driver module A4988
 - 12V power supply
 ## Schematic
-![SVG Image](schematic.drawio.svg)
+![PNG Image](stepper.png)
 ## Usage
 Commands supported:
 ```
